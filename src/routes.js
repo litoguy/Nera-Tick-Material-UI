@@ -83,7 +83,7 @@ const routes = [
         collapse: [
           {
             name: "Checkout",
-            route: "/pages/landing-pages/checkout",
+            route: "/checkout",
             component: <Checkout />,
           },
           {
@@ -98,7 +98,7 @@ const routes = [
           },
           {
             name: "EventStore",
-            route: "/pages/landing-pages/events",
+            route: "/admin/events",
             component: <Eventstore />,
           },
         ],

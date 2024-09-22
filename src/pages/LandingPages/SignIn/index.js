@@ -1,54 +1,63 @@
-/**
-=========================================================
-* Material Kit 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-kit-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState } from "react";
-
+import axios from "axios";
 // react-router-dom components
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 // @mui material components
 import Card from "@mui/material/Card";
 import Switch from "@mui/material/Switch";
 import Grid from "@mui/material/Grid";
 import MuiLink from "@mui/material/Link";
-
 // @mui icons
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
-
 // Material Kit 2 React components
 import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 import MKInput from "components/MKInput";
 import MKButton from "components/MKButton";
-
 // Material Kit 2 React example components
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 import SimpleFooter from "examples/Footers/SimpleFooter";
-
 // Material Kit 2 React page layout routes
 import routes from "routes";
 
-// Images
-// import bgImage from "assets/images/bg-sign-in-basic.jpeg";
+// Material Kit 2 React components
+import MKAlert from "components/MKAlert";
 
 function SignInBasic() {
   const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null); // Fix here
+
+  const navigate = useNavigate(); // Hook for navigation
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Send POST request to the login API
+      const response = await axios.post("http://127.0.0.1:8000/api/auth/login", {
+        email,
+        password,
+      });
+
+      // Save the token in sessionStorage
+      sessionStorage.setItem("token", response.data.token);
+
+      // Redirect or update UI
+      console.log("Login successful:", response.data);
+      alert("Login successful"); // Updated alert
+      navigate("/admin/events"); // Redirect to dashboard
+    } catch (err) {
+      // Handle error
+      console.error("Login failed:", err);
+      setError(err.response ? err.response.data.message : "Login failed"); // Updated error handling
+    }
+  };
 
   return (
     <>
@@ -56,9 +65,9 @@ function SignInBasic() {
         routes={routes}
         action={{
           type: "external",
-          route: "https://www.creative-tim.com/product/material-kit-react",
-          label: "free download",
-          color: "info",
+          route: "#",
+          label: "",
+          color: "",
         }}
         transparent
         light
@@ -96,6 +105,12 @@ function SignInBasic() {
                 mb={1}
                 textAlign="center"
               >
+                {/* Display error message */}
+                {error && (
+                  <MKAlert color="error" dismissible>
+                    {error}!!
+                  </MKAlert>
+                )}
                 <MKTypography variant="h4" fontWeight="medium" color="white" mt={1}>
                   Sign in
                 </MKTypography>
@@ -118,46 +133,66 @@ function SignInBasic() {
                 </Grid>
               </MKBox>
               <MKBox pt={4} pb={3} px={3}>
-                <MKBox component="form" role="form">
-                  <MKBox mb={2}>
-                    <MKInput type="email" label="Email" fullWidth />
-                  </MKBox>
-                  <MKBox mb={2}>
-                    <MKInput type="password" label="Password" fullWidth />
-                  </MKBox>
-                  <MKBox display="flex" alignItems="center" ml={-1}>
-                    <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-                    <MKTypography
-                      variant="button"
-                      fontWeight="regular"
-                      color="text"
-                      onClick={handleSetRememberMe}
-                      sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-                    >
-                      &nbsp;&nbsp;Remember me
-                    </MKTypography>
-                  </MKBox>
-                  <MKBox mt={4} mb={1}>
-                    <MKButton variant="gradient" color="info" fullWidth>
-                      sign in
-                    </MKButton>
-                  </MKBox>
-                  <MKBox mt={3} mb={1} textAlign="center">
-                    <MKTypography variant="button" color="text">
-                      Don&apos;t have an account?{" "}
+                <form onSubmit={handleSubmit}>
+                  <MKBox component="form" role="form" type="submit">
+                    <MKBox mb={2}>
+                      <MKInput
+                        type="email"
+                        label="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        fullWidth
+                      />
+                    </MKBox>
+                    <MKBox mb={2}>
+                      <MKInput
+                        type="password"
+                        label="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        fullWidth
+                      />
+                    </MKBox>
+                    <MKBox display="flex" alignItems="center" ml={-1}>
+                      <Switch checked={rememberMe} onChange={handleSetRememberMe} />
                       <MKTypography
-                        component={Link}
-                        to="/authentication/sign-up/cover"
                         variant="button"
-                        color="info"
-                        fontWeight="medium"
-                        textGradient
+                        fontWeight="regular"
+                        color="text"
+                        onClick={handleSetRememberMe}
+                        sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
                       >
-                        Sign up
+                        &nbsp;&nbsp;Remember me
                       </MKTypography>
-                    </MKTypography>
+                    </MKBox>
+                    <MKBox mt={4} mb={1}>
+                      <MKButton
+                        variant="gradient"
+                        color="info"
+                        type="submit"
+                        fullWidth
+                        onClick={handleSubmit}
+                      >
+                        Sign In
+                      </MKButton>
+                    </MKBox>
+                    <MKBox mt={3} mb={1} textAlign="center">
+                      <MKTypography variant="button" color="text">
+                        Don&apos;t have an account?{" "}
+                        <MKTypography
+                          component={Link}
+                          to="/auth/sign-up"
+                          variant="button"
+                          color="info"
+                          fontWeight="medium"
+                          textGradient
+                        >
+                          Sign up
+                        </MKTypography>
+                      </MKTypography>
+                    </MKBox>
                   </MKBox>
-                </MKBox>
+                </form>
               </MKBox>
             </Card>
           </Grid>

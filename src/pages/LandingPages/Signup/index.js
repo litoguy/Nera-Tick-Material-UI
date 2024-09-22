@@ -1,54 +1,79 @@
-/**
-=========================================================
-* Material Kit 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-kit-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState } from "react";
-
-// react-router-dom components
 import { Link } from "react-router-dom";
-
-// @mui material components
 import Card from "@mui/material/Card";
 import Switch from "@mui/material/Switch";
 import Grid from "@mui/material/Grid";
 import MuiLink from "@mui/material/Link";
-
-// @mui icons
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
-
-// Material Kit 2 React components
 import MKBox from "components/MKBox";
 import MKTypography from "components/MKTypography";
 import MKInput from "components/MKInput";
 import MKButton from "components/MKButton";
-
-// Material Kit 2 React example components
+import MKAlert from "components/MKAlert";
 import DefaultNavbar from "examples/Navbars/DefaultNavbar";
 import SimpleFooter from "examples/Footers/SimpleFooter";
-
-// Material Kit 2 React page layout routes
+import axios from "axios";
 import routes from "routes";
-
-// Images
-// import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
 function SignUpBasic() {
   const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Check if passwords match
+  const passwordsMatch = () => {
+    return formData.password === formData.password_confirmation;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({}); // Clear previous errors
+    setSuccessMessage(null); // Clear previous success message
+
+    // Check if passwords match before making the API request
+    if (!passwordsMatch()) {
+      setErrors({ password_confirmation: ["Passwords do not match"] });
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/auth/register", formData);
+
+      if (response.status === 201) {
+        // On success, clear form and show success message
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+        });
+        setSuccessMessage("Registration successful!");
+      }
+    } catch (error) {
+      // Handle error response from server
+      if (error.response && error.response.data.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: ["An error occurred. Please try again."] });
+      }
+    }
+  };
 
   return (
     <>
@@ -56,7 +81,7 @@ function SignUpBasic() {
         routes={routes}
         action={{
           type: "external",
-          route: "https://www.creative-tim.com/product/material-kit-react",
+          route: "#",
           label: "free download",
           color: "info",
         }}
@@ -118,21 +143,64 @@ function SignUpBasic() {
                 </Grid>
               </MKBox>
               <MKBox pt={4} pb={3} px={3}>
-                <MKBox component="form" role="form">
+                {/* Display error messages */}
+                {Object.keys(errors).length > 0 && (
+                  <MKAlert color="error" dismissible>
+                    {Object.keys(errors).map((key) => (
+                      <div key={key}>
+                        {errors[key].map((err, index) => (
+                          <p key={index}>{err}</p>
+                        ))}
+                      </div>
+                    ))}
+                  </MKAlert>
+                )}
+                {/* Display success message */}
+                {successMessage && (
+                  <MKAlert color="success" dismissible>
+                    {successMessage}
+                  </MKAlert>
+                )}
+                <form onSubmit={handleSubmit}>
                   <MKBox mb={2}>
-                    <MKInput type="text" label="Fullname" fullWidth />
+                    <MKInput
+                      type="text"
+                      label="Full Name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      fullWidth
+                    />
                   </MKBox>
                   <MKBox mb={2}>
-                    <MKInput type="email" label="Email" fullWidth />
+                    <MKInput
+                      type="email"
+                      label="Email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      fullWidth
+                    />
                   </MKBox>
                   <MKBox mb={2}>
-                    <MKInput type="text" label="Phone" fullWidth />
+                    <MKInput
+                      type="password"
+                      label="Password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      fullWidth
+                    />
                   </MKBox>
                   <MKBox mb={2}>
-                    <MKInput type="text" label="Name of Event" fullWidth />
-                  </MKBox>
-                  <MKBox mb={2}>
-                    <MKInput type="text" label="Event Category" fullWidth />
+                    <MKInput
+                      type="password"
+                      label="Confirm Password"
+                      name="password_confirmation"
+                      value={formData.password_confirmation}
+                      onChange={handleChange}
+                      fullWidth
+                    />
                   </MKBox>
                   <MKBox display="flex" alignItems="center" ml={-1}>
                     <Switch checked={rememberMe} onChange={handleSetRememberMe} />
@@ -143,30 +211,30 @@ function SignUpBasic() {
                       onClick={handleSetRememberMe}
                       sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
                     >
-                      &nbsp;&nbsp;I agree to all terms and conditoions of the software.
+                      &nbsp;&nbsp;I agree to all terms and conditions.
                     </MKTypography>
                   </MKBox>
                   <MKBox mt={4} mb={1}>
-                    <MKButton variant="gradient" color="info" fullWidth>
-                      sign up
+                    <MKButton variant="gradient" color="info" type="submit" fullWidth>
+                      Sign Up
                     </MKButton>
                   </MKBox>
                   <MKBox mt={3} mb={1} textAlign="center">
                     <MKTypography variant="button" color="text">
-                      I have an account?{" "}
+                      Already have an account?{" "}
                       <MKTypography
                         component={Link}
-                        to="/authentication/sign-up/cover"
+                        to="/auth/sign-in"
                         variant="button"
                         color="info"
                         fontWeight="medium"
                         textGradient
                       >
-                        Sign in
+                        Sign In
                       </MKTypography>
                     </MKTypography>
                   </MKBox>
-                </MKBox>
+                </form>
               </MKBox>
             </Card>
           </Grid>
