@@ -16,17 +16,69 @@ Coded by www.creative-tim.com
 // @mui material components
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-
+import { useState } from "react";
 // Material Kit 2 React components
 import MKBox from "components/MKBox";
 import MKInput from "components/MKInput";
 import MKButton from "components/MKButton";
 import MKTypography from "components/MKTypography";
+import axios from "axios";
+import MKAlert from "components/MKAlert";
 
 // Images
 import bgImage from "assets/images/examples/blog2.jpg";
 
 function Contact() {
+  const [formData, setFormData] = useState({
+    GuestName: "",
+    GuestEmail: "",
+    GuestPhone: "",
+    numberOfTickets: "",
+    additionalInfo: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({}); // Clear previous errors
+    setSuccessMessage(null); // Clear previous success message
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/tickets/purchase/{uuid}",
+        formData
+      );
+
+      if (response.status === 201) {
+        // On success, clear form and show success message
+        setFormData({
+          GuestName: "",
+          GuestEmail: "",
+          GuestPhone: "",
+          numberOfTickets: "",
+          additionalInfo: "",
+        });
+        setSuccessMessage("Registration successful!");
+      }
+    } catch (error) {
+      // Handle error response from server
+      if (error.response && error.response.data.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: ["An error occurred. Please try again."] });
+      }
+    }
+  };
+
   return (
     <MKBox component="section" py={{ xs: 0, lg: 6 }}>
       <Container>
@@ -136,7 +188,7 @@ function Contact() {
                 </MKBox>
               </Grid>
               <Grid item xs={12} lg={7}>
-                <MKBox component="form" p={2} method="post">
+                <MKBox component="form" p={2} method="post" onSubmit={handleSubmit}>
                   <MKBox px={3} py={{ xs: 2, sm: 6 }}>
                     <MKTypography variant="h2" mb={1}>
                       Hi!
@@ -147,11 +199,32 @@ function Contact() {
                   </MKBox>
                   <MKBox pt={0.5} pb={3} px={3}>
                     <Grid container>
+                      {/* Display error messages */}
+                      {Object.keys(errors).length > 0 && (
+                        <MKAlert color="error" dismissible>
+                          {Object.keys(errors).map((key) => (
+                            <div key={key}>
+                              {errors[key].map((err, index) => (
+                                <p key={index}>{err}</p>
+                              ))}
+                            </div>
+                          ))}
+                        </MKAlert>
+                      )}
+                      {/* Display success message */}
+                      {successMessage && (
+                        <MKAlert color="success" dismissible>
+                          {successMessage}
+                        </MKAlert>
+                      )}
                       <Grid item xs={12} pr={1} mb={6}>
                         <MKInput
                           variant="standard"
                           label="Full name"
                           InputLabelProps={{ shrink: true }}
+                          name="GuestName"
+                          value={formData.GuestName}
+                          onChange={handleChange}
                           fullWidth
                           required
                         />
@@ -161,6 +234,9 @@ function Contact() {
                           variant="standard"
                           label="Phone"
                           InputLabelProps={{ shrink: true }}
+                          name="GuestPhone"
+                          value={formData.GuestPhone}
+                          onChange={handleChange}
                           fullWidth
                           required
                         />
@@ -170,6 +246,9 @@ function Contact() {
                           variant="standard"
                           label="Email"
                           InputLabelProps={{ shrink: true }}
+                          name="GuestEmail"
+                          value={formData.GuestEmail}
+                          onChange={handleChange}
                           fullWidth
                           required
                         />
@@ -179,6 +258,9 @@ function Contact() {
                           variant="standard"
                           label="Number of tickets"
                           InputLabelProps={{ shrink: true }}
+                          name="numberOfTickets"
+                          value={formData.numberOfTickets}
+                          onChange={handleChange}
                           fullWidth
                           required
                         />
@@ -189,6 +271,9 @@ function Contact() {
                           label="Additional Information"
                           placeholder="Anything you want us to know"
                           InputLabelProps={{ shrink: true }}
+                          name="additionalInfo"
+                          value={formData.additionalInfo}
+                          onChange={handleChange}
                           fullWidth
                         />
                       </Grid>
@@ -202,7 +287,7 @@ function Contact() {
                       textAlign="right"
                       ml="auto"
                     >
-                      <MKButton variant="gradient" color="info">
+                      <MKButton type="submit" variant="gradient" color="info">
                         Proceed to Payment
                       </MKButton>
                     </Grid>

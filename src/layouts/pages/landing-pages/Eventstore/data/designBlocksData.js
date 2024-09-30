@@ -24,7 +24,7 @@ export default [
       {
         image:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR64I7hK0aC3d9avU51xWryz3LEptovNr_XrA&s",
-        name: "Tidal Rave '24",
+        name: "",
         count: 200,
         route: "/auth/sign-in",
       },

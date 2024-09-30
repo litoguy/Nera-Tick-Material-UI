@@ -1,38 +1,37 @@
-/*
-=========================================================
-* Material Kit 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-kit-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// react-router-dom components
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-// @mui material components
+import axios from "axios";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
-
-// Material Kit 2 React components
 import MKBox from "components/MKBox";
 import MKBadge from "components/MKBadge";
 import MKTypography from "components/MKTypography";
-
-// Presentation page components
 import ExampleCard from "pages/Presentation/components/ExampleCard";
-
-// Data
 import data from "pages/Presentation/sections/data/designBlocksData";
 
-function DesignBlocks() {
-  const renderData = data.map(({ title, description, items }) => (
+const API_URL = "http://127.0.0.1:8000/api"; // Replace with your actual API URL
+
+const DesignBlocks = () => {
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const data = await axios.get(`${API_URL}/tickets`);
+        setTickets(data.data); // Set the tickets in state
+      } catch (err) {
+        setError("Failed to fetch tickets"); // Handle error
+      } finally {
+        setLoading(false); // Set loading to false
+      }
+    };
+
+    fetchTickets(); // Call the fetch function
+  }, []);
+
+  const renderStaticData = data.map(({ title, description, items }) => (
     <Grid container spacing={3} sx={{ mb: 10 }} key={title}>
       <Grid item xs={12} lg={3}>
         <MKBox position="sticky" top="100px" pb={{ xs: 2, lg: 6 }}>
@@ -57,6 +56,37 @@ function DesignBlocks() {
       </Grid>
     </Grid>
   ));
+
+  const renderDynamicTickets = () => (
+    <Grid container spacing={3} sx={{ mb: 10 }}>
+      <Grid item xs={12} lg={3}>
+        <MKBox position="sticky" top="100px" pb={{ xs: 2, lg: 6 }}>
+          <MKTypography variant="h3" fontWeight="bold" mb={1}>
+            Tickets
+          </MKTypography>
+          <MKTypography variant="body2" fontWeight="regular" color="secondary" mb={1} pr={2}>
+            Dynamically fetched tickets
+          </MKTypography>
+        </MKBox>
+      </Grid>
+      <Grid item xs={12} lg={9}>
+        <Grid container spacing={3}>
+          {tickets.map((ticket) => (
+            <Grid item xs={12} md={4} sx={{ mb: 2 }} key={ticket.uuid}>
+              <Link to={`/ticket/${ticket.id}`}>
+                <ExampleCard
+                  image="" // You can assign an image URL based on ticket data if available
+                  name={ticket.title}
+                  count={ticket.count || 10}
+                  pro={ticket.pro || false}
+                />
+              </Link>
+            </Grid>
+          ))}
+        </Grid>
+      </Grid>
+    </Grid>
+  );
 
   return (
     <MKBox component="section" my={6} py={6}>
@@ -86,9 +116,13 @@ function DesignBlocks() {
           </MKTypography>
         </Grid>
       </Container>
-      <Container sx={{ mt: 6 }}>{renderData}</Container>
+      <Container sx={{ mt: 6 }}>
+        {renderStaticData}
+        {loading ? <p>Loading tickets...</p> : renderDynamicTickets()}
+        {error && <p>{error}</p>}
+      </Container>
     </MKBox>
   );
-}
+};
 
 export default DesignBlocks;

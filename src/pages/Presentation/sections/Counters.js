@@ -33,8 +33,8 @@ function Counters() {
             <DefaultCounterCard
               count={10}
               suffix="+"
-              title="Years of Industry experience"
-              description="We have worked with Several orgnizers across the country and across the world at large."
+              title="Years Of Industry Experience"
+              description="We have collaborated with numerous organizations both domestically and internationally."
             />
           </Grid>
           <Grid item xs={12} md={4} display="flex">
@@ -42,8 +42,9 @@ function Counters() {
             <DefaultCounterCard
               count={1000}
               suffix="+"
-              title="Trust by Event Organizers World"
-              description="We have Succesfully almost all the bigest events accros the country through our system."
+              title="Trust By Event Organizers World"
+              description="Almost all of the largest events held around the nation have been successfully handled by our technology.
+"
             />
             <Divider orientation="vertical" sx={{ display: { xs: "none", md: "block" }, ml: 0 }} />
           </Grid>
@@ -51,7 +52,8 @@ function Counters() {
             <DefaultCounterCard
               count={4000}
               title="Tickets Sales"
-              description="we sold lots of tickets for some of the biggest events with no issues whatsoever."
+              description="With no problems at all, we sold a lot of tickets for some of the largest events.
+"
             />
           </Grid>
         </Grid>

@@ -87,6 +87,11 @@ const routes = [
             component: <Checkout />,
           },
           {
+            name: "Checkout Page",
+            route: "/checkout/purchase/:productId/:uuid",
+            component: <Checkout />,
+          },
+          {
             name: "about us",
             route: "/pages/landing-pages/about-us",
             component: <AboutUs />,
